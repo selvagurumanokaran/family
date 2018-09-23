@@ -6,27 +6,26 @@ import com.geektrust.family.dto.Relationship;
 import com.geektrust.family.dto.Sex;
 import com.geektrust.family.service.FamiliyTree;
 
-public class FamilyTreeTest {
+public class FamilyTreeTestSample {
 
     private static FamiliyTree familiyTree;
 
     public static void main(String[] args) {
 	createInitialFamilyTree();
-	Person person;
-	// Person person = familiyTree.getPersonByName("Vich");
-	// System.out.println(familiyTree.getRelations(person,
-	// Relationship.BROTHER_IN_LAW));
 
-	// person = familiyTree.getPersonByName("Vich");
-	// System.out.println(familiyTree.getRelations(person, Relationship.BROTHERS));
+	Person person = familiyTree.getPersonByName("Vich");
+	System.out.println(familiyTree.getRelations(person, Relationship.BROTHER_IN_LAW));
 
-	// person = familiyTree.getPersonByName("Satya");
-	// System.out.println(familiyTree.getRelations(person, Relationship.CHILDREN));
-	// person = familiyTree.getPersonByName("Kriya");
-	// System.out.println(familiyTree.getRelations(person, Relationship.COUSINS));
+	person = familiyTree.getPersonByName("Vich");
+	System.out.println(familiyTree.getRelations(person, Relationship.BROTHER));
 
-	// person = familiyTree.getPersonByName("Vich");
-	// System.out.println(familiyTree.getRelations(person, Relationship.BROTHERS));
+	person = familiyTree.getPersonByName("Satya");
+	System.out.println(familiyTree.getRelations(person, Relationship.CHILDREN));
+	person = familiyTree.getPersonByName("Kriya");
+	System.out.println(familiyTree.getRelations(person, Relationship.COUSIN));
+
+	person = familiyTree.getPersonByName("Vich");
+	System.out.println(familiyTree.getRelations(person, Relationship.BROTHER));
 	person = familiyTree.getPersonByName("Lavnya");
 	familiyTree.addNewChild(person, "Vanya", Relationship.DAUGHTER);
 	familiyTree.addNewChild(person, "Backi", Relationship.DAUGHTER);
@@ -35,7 +34,9 @@ public class FamilyTreeTest {
 	System.out.println(familiyTree.getRelations(p, Relationship.GRAND_DAUGHTER));
 
 	System.out.println(familiyTree.getMothersWithMostChildren());
-
+	person = familiyTree.getPersonByName("Jnki");
+	Person relative = familiyTree.getPersonByName("Chika");
+	System.out.println(familiyTree.findRelation(person, relative));
     }
 
     private static void createInitialFamilyTree() {

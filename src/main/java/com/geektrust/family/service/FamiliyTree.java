@@ -1,12 +1,13 @@
 package com.geektrust.family.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-
 import com.geektrust.family.dto.Family;
 import com.geektrust.family.dto.Person;
 import com.geektrust.family.dto.Relationship;
@@ -38,19 +39,7 @@ public class FamiliyTree {
 	Set<String> names = new HashSet<>();
 	switch (relationship) {
 	case BROTHER_IN_LAW:
-	    Person spouse = getSpouse(person);
-	    List<Person> spouseBrothers = getBrothers(spouse);
-
-	    List<Person> sisters = getSisters(person);
-	    List<Person> husbansOfSisters = new ArrayList<>();
-	    sisters.stream().forEach((s) -> {
-		Person husband = familyMap.get(s.getName()).getHusband();
-		if (husband != null) {
-		    husbansOfSisters.add(husband);
-		}
-	    });
-	    husbansOfSisters.stream().forEach((p) -> names.add(p.getName()));
-	    spouseBrothers.stream().forEach((p) -> names.add(p.getName()));
+	    getBrotherInLaws(person).stream().forEach(p -> names.add(p.getName()));
 	    break;
 	case BROTHER:
 	    getBrothers(person).stream().forEach(p -> names.add(p.getName()));
@@ -71,7 +60,11 @@ public class FamiliyTree {
 	    getDaughters(person).stream().forEach(d -> names.add(d.getName()));
 	    break;
 	case FATHER:
-	    names.add(getFather(person).getName());
+	    try {
+		names.add(getFather(person).getName());
+	    } catch (NullPointerException e) {
+		// Do nothing. Set shall be empty
+	    }
 	    break;
 	case GRAND_DAUGHTER:
 	    getChildren(person).stream().forEach(c -> {
@@ -79,43 +72,63 @@ public class FamiliyTree {
 	    });
 	    break;
 	case MATERNAL_AUNT:
-	    getSisters(getMother(person)).stream().forEach(s -> names.add(s.getName()));
-	    getBrothers(getMother(person)).stream().forEach(b -> {
-		Person s = getSpouse(b);
-		if (s != null) {
-		    names.add(s.getName());
-		}
-	    });
+	    try {
+		getSisters(getMother(person)).stream().forEach(s -> names.add(s.getName()));
+		getBrothers(getMother(person)).stream().forEach(b -> {
+		    Person s = getSpouse(b);
+		    if (s != null) {
+			names.add(s.getName());
+		    }
+		});
+	    } catch (NullPointerException e) {
+		// Do nothing. Set shall be empty
+	    }
 	    break;
 	case MATERNAL_UNCLE:
-	    getBrothers(getMother(person)).stream().forEach(b -> names.add(b.getName()));
-	    getSisters(getMother(person)).stream().forEach(s -> {
-		Person spous = getSpouse(s);
-		if (spous != null) {
-		    names.add(spous.getName());
-		}
-	    });
+	    try {
+		getBrothers(getMother(person)).stream().forEach(b -> names.add(b.getName()));
+		getSisters(getMother(person)).stream().forEach(s -> {
+		    Person spous = getSpouse(s);
+		    if (spous != null) {
+			names.add(spous.getName());
+		    }
+		});
+	    } catch (NullPointerException e) {
+		// Do nothing. Set shall be empty
+	    }
 	    break;
 	case MOTHER:
-	    names.add(getMother(person).getName());
+	    try {
+		names.add(getMother(person).getName());
+	    } catch (NullPointerException e) {
+		// Do nothing. Set shall be empty
+	    }
 	    break;
 	case PATERNAL_AUNT:
-	    getSisters(getFather(person)).stream().forEach(s -> names.add(s.getName()));
-	    getBrothers(getFather(person)).stream().forEach(b -> {
-		Person s = getSpouse(b);
-		if (s != null) {
-		    names.add(s.getName());
-		}
-	    });
+	    try {
+		getSisters(getFather(person)).stream().forEach(s -> names.add(s.getName()));
+		getBrothers(getFather(person)).stream().forEach(b -> {
+		    Person s = getSpouse(b);
+		    if (s != null) {
+			names.add(s.getName());
+		    }
+		});
+	    } catch (NullPointerException e) {
+		// Do nothing. Set shall be empty
+	    }
 	    break;
 	case PATERNAL_UNCLE:
-	    getBrothers(getFather(person)).stream().forEach(b -> names.add(b.getName()));
-	    getSisters(getFather(person)).stream().forEach(s -> {
-		Person spous = getSpouse(s);
-		if (spous != null) {
-		    names.add(spous.getName());
-		}
-	    });
+	    try {
+		getBrothers(getFather(person)).stream().forEach(b -> names.add(b.getName()));
+		getSisters(getFather(person)).stream().forEach(s -> {
+		    Person spous = getSpouse(s);
+		    if (spous != null) {
+			names.add(spous.getName());
+		    }
+		});
+	    } catch (NullPointerException e) {
+		// Do nothing. Set shall be empty
+	    }
 	    break;
 	case SISTER_IN_LAW:
 	    getSisters(getSpouse(person)).stream().forEach(s -> names.add(s.getName()));
@@ -136,6 +149,25 @@ public class FamiliyTree {
 	    break;
 	}
 	return names;
+    }
+
+    private List<Person> getBrotherInLaws(Person person) {
+
+	List<Person> brotherInLaws = new ArrayList<>();
+	Person spouse = getSpouse(person);
+	List<Person> spouseBrothers = getBrothers(spouse);
+
+	List<Person> sisters = getSisters(person);
+	List<Person> husbansOfSisters = new ArrayList<>();
+	sisters.stream().forEach((s) -> {
+	    Person husband = familyMap.get(s.getName()).getHusband();
+	    if (husband != null) {
+		husbansOfSisters.add(husband);
+	    }
+	});
+	husbansOfSisters.stream().forEach((p) -> brotherInLaws.add(p));
+	spouseBrothers.stream().forEach((p) -> brotherInLaws.add(p));
+	return brotherInLaws;
     }
 
     private Person getMother(Person person) {
@@ -248,6 +280,17 @@ public class FamiliyTree {
 		result.names.add(wife.getName());
 	    }
 	}
+    }
+
+    public String findRelation(Person person, Person relative) {
+
+	Optional<Relationship> relation = Arrays.stream(Relationship.values()).filter(r -> {
+	    return getRelations(person, r).contains(relative.getName());
+	}).findFirst();
+	if (relation.isPresent()) {
+	    return relation.get().name();
+	}
+	return "";
     }
 
     class Result {
